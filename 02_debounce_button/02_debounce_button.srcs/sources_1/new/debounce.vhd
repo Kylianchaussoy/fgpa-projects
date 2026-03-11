@@ -40,52 +40,52 @@ entity debounce is
 end debounce;
 
 architecture Behavioral of debounce is
-    constant c_2pow16 : natural :=  65536;
-    signal no_debounce_cpt : natural range 0 to c_2pow16 -1 := 0;
-    signal debounce_cpt : natural range 0 to c_2pow16 -1 := 0;
-    signal signal1 : std_logic := '0';
-    signal signal2 : std_logic := '0';
-    signal debounced_btn : std_logic;
+    constant c_2POW16 : natural :=  65536;
+    signal s_no_debounce_cpt : natural range 0 to c_2POW16 -1 := 0;
+    signal s_debounce_cpt : natural range 0 to c_2POW16 -1 := 0;
+    signal s_wire1 : std_logic := '0';
+    signal s_wire2 : std_logic := '0';
+    signal s_debounced_btn : std_logic;
 
 begin
-    debounce : process (clk) is
+    p_debounce : process (clk) is
     begin
     if rising_edge(clk) then
-        signal1 <= btn;
-        signal2 <= not signal1;
-        debounced_btn <= signal1 and signal2;
+        s_wire1 <= btn;
+        s_wire2 <= not s_wire1;
+        s_debounced_btn <= s_wire1 and s_wire2;
     end if;
-    end process debounce;
+    end process p_debounce;
     
-    no_debounce : process (btn) is
+    p_no_debounce_counter : process (btn) is
     begin
     if btn = '1' then
-        if no_debounce_cpt < c_2pow16 - 1 then
-            no_debounce_cpt <= no_debounce_cpt +1;
-        else no_debounce_cpt <= 0;
+        if s_no_debounce_cpt < c_2POW16 - 1 then
+            s_no_debounce_cpt <= s_no_debounce_cpt +1;
+        else s_no_debounce_cpt <= 0;
         end if;
     end if;
-    end process no_debounce;
+    end process p_no_debounce_counter;
     
-    increment_debounce : process (debounced_btn) is
+    p_debounce_counter : process (s_debounced_btn) is
     begin
-    if rising_edge(debounced_btn) then
-        if debounce_cpt < c_2pow16 - 1 then
-            debounce_cpt <= debounce_cpt +1;
-        else debounce_cpt <= 0;
+    if rising_edge(s_debounced_btn) then
+        if s_debounce_cpt < c_2POW16 - 1 then
+            s_debounce_cpt <= s_debounce_cpt +1;
+        else s_debounce_cpt <= 0;
         end if;
     end if;
-    end process increment_debounce;
+    end process p_debounce_counter;
     
-    switch : process (clk) is
+    p_switch : process (clk) is
     begin
     if rising_edge(clk)then
         if switch_debounce = '1' then
-            led <= std_logic_vector(to_unsigned(debounce_cpt, 16));
+            led <= std_logic_vector(to_unsigned(s_debounce_cpt, 16));
         else
-            led <= std_logic_vector(to_unsigned(no_debounce_cpt, 16));
+            led <= std_logic_vector(to_unsigned(s_no_debounce_cpt, 16));
         end if;
     end if;
-    end process switch;
+    end process p_switch;
 
 end Behavioral;
