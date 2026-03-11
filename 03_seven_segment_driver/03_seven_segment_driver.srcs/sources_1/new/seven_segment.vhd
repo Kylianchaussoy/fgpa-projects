@@ -40,24 +40,24 @@ entity seven_segment is
 end seven_segment;
 
 architecture Behavioral of seven_segment is
-signal slow_clk1 : std_logic := '0';
-signal slow_clk2 : std_logic := '0';
-signal an_sig : std_logic_vector(3 downto 0) := "1110";
-signal clock_counter1 : natural := 0;
-signal clock_counter2 : natural := 0;
-signal msg_ptr : integer range 0 to 6 := 6;
-signal char0, char1, char2, char3 : std_logic_vector(6 downto 0);
+signal s_slow_clk1 : std_logic := '0';
+signal s_slow_clk2 : std_logic := '0';
+signal s_an : std_logic_vector(3 downto 0) := "1110";
+signal s_clock_counter1 : natural := 0;
+signal s_clock_counter2 : natural := 0;
+signal s_msg_ptr : integer range 0 to 6 := 6;
+signal s_char0, s_char1, s_char2, s_char3 : std_logic_vector(6 downto 0);
 
-constant clock_divider1 : natural := 100000; --500Hz
-constant clock_divider2 : natural := 25000000; --2Hz
-constant B : std_logic_vector(6 downto 0) := "0000000";
-constant A : std_logic_vector(6 downto 0) := "0001000";
-constant S : std_logic_vector(6 downto 0) := "0010010";
-constant Y : std_logic_vector(6 downto 0) := "0010001";
-constant three : std_logic_vector(6 downto 0) := "0110000";
+constant c_CLOCK_DIVIDER1 : natural := 100000; --500Hz
+constant c_CLOCK_DIVIDER2 : natural := 25000000; --2Hz
+constant c_B : std_logic_vector(6 downto 0) := "0000000";
+constant c_A : std_logic_vector(6 downto 0) := "0001000";
+constant c_S : std_logic_vector(6 downto 0) := "0010010";
+constant c_Y : std_logic_vector(6 downto 0) := "0010001";
+constant c_3 : std_logic_vector(6 downto 0) := "0110000";
 
-type array_message is array (6 downto 0) of std_logic_vector(6 downto 0);
-constant message : array_message := (B, A, S, Y, S, three, "1111111");
+type t_array_message is array (6 downto 0) of std_logic_vector(6 downto 0);
+constant c_MESSAGE : t_array_message := (c_B, c_A, c_S, c_Y, c_S, c_3, "1111111");
 
 begin
     dp <= '1';
@@ -65,52 +65,52 @@ begin
     p_clock_divider : process (clk) is
     begin
     if rising_edge(clk) then
-        if clock_counter1 < clock_divider1 then
-            clock_counter1 <= clock_counter1 + 1;
+        if s_clock_counter1 < c_CLOCK_DIVIDER1 then
+            s_clock_counter1 <= s_clock_counter1 + 1;
         else 
-            clock_counter1 <= 0;
-            slow_clk1 <= not slow_clk1;
+            s_clock_counter1 <= 0;
+            s_slow_clk1 <= not s_slow_clk1;
         end if;
         
-        if clock_counter2 < clock_divider2 then
-            clock_counter2 <= clock_counter2 + 1;
+        if s_clock_counter2 < c_CLOCK_DIVIDER2 then
+            s_clock_counter2 <= s_clock_counter2 + 1;
         else 
-            clock_counter2 <= 0;
-            slow_clk2 <= not slow_clk2;
+            s_clock_counter2 <= 0;
+            s_slow_clk2 <= not s_slow_clk2;
         end if;
     end if;
     end process p_clock_divider;
         
-    p_4_displays : process (slow_clk1) is
+    p_4_displays : process (s_slow_clk1) is
     begin
-    if rising_edge(slow_clk1) then
-        an_sig <= an_sig(2 downto 0) & an_sig(3);
+    if rising_edge(s_slow_clk1) then
+        s_an <= s_an(2 downto 0) & s_an(3);
     end if;
     end process p_4_displays;
     
-    p_scroll : process(slow_clk2)
+    p_scroll : process(s_slow_clk2)
     begin
-        if rising_edge(slow_clk2) then
-            if msg_ptr = 0 then
-                msg_ptr <= 6;
+        if rising_edge(s_slow_clk2) then
+            if s_msg_ptr = 0 then
+                s_msg_ptr <= 6;
             else
-                msg_ptr <= msg_ptr - 1;
+                s_msg_ptr <= s_msg_ptr - 1;
             end if;
         end if;
     end process p_scroll;
     
-    an <= an_sig;
+    an <= s_an;
     
-    char3 <= MESSAGE(msg_ptr);
-    char2 <= MESSAGE((msg_ptr - 1) mod 7);
-    char1 <= MESSAGE((msg_ptr - 2) mod 7);
-    char0 <= MESSAGE((msg_ptr - 3) mod 7); 
+    s_char3 <= c_MESSAGE(s_msg_ptr);
+    s_char2 <= c_MESSAGE((s_msg_ptr - 1) mod 7);
+    s_char1 <= c_MESSAGE((s_msg_ptr - 2) mod 7);
+    s_char0 <= c_MESSAGE((s_msg_ptr - 3) mod 7); 
     
-    with an_sig select
-        seg <= char3 when "0111",
-               char2 when "1011",
-               char1 when "1101",
-               char0 when "1110",
+    with s_an select
+        seg <= s_char3 when "0111",
+               s_char2 when "1011",
+               s_char1 when "1101",
+               s_char0 when "1110",
                "1111111" when others;
 
 end Behavioral;
