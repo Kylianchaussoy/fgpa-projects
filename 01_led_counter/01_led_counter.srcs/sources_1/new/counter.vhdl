@@ -39,48 +39,48 @@ entity counter is
 end counter;
 
 architecture Behavioral of counter is
-    constant c_2pow16 : natural :=  65536;
-    signal cpt : natural range 0 to c_2pow16 -1 := 0;
-    constant clk_divisor1 : natural := 1000000;
-    constant clk_divisor2 : natural := 100000;
-    signal clk_divided : std_logic := '0';
-    signal clk_count : natural := 0;
+    constant c_2POW16 : natural :=  65536;
+    constant c_CLK_DIVISOR1 : natural := 1000000;
+    constant c_CLK_DIVISOR2 : natural := 100000;
+    signal s_cpt : natural range 0 to c_2POW16 -1 := 0;
+    signal s_clk_divided : std_logic := '0';
+    signal s_clk_count : natural := 0;
 
 begin
-    clk_divider : process (clk) is
-    variable divisor : natural;
+    p_clk_divider : process (clk) is
+    variable v_divisor : natural;
     begin
     if rising_edge(clk) then
         if switch2 = '1' then
-            divisor := clk_divisor2;
-        else divisor := clk_divisor1;
+            v_divisor := c_CLK_DIVISOR2;
+        else v_divisor := c_CLK_DIVISOR1;
         end if;
 
-        clk_count <= clk_count +1;
-        if clk_count >= divisor then
-            clk_divided <= not clk_divided;
-            clk_count <= 0;
+        s_clk_count <= s_clk_count +1;
+        if s_clk_count >= v_divisor then
+            s_clk_divided <= not s_clk_divided;
+            s_clk_count <= 0;
         end if;
     end if;
-    end process clk_divider;
+    end process p_clk_divider;
 
-    increment : process (clk_divided) is
+    p_increment : process (s_clk_divided) is
     begin
-    if rising_edge(clk_divided) then
+    if rising_edge(s_clk_divided) then
         if switch1 = '1' then
-            if cpt < c_2pow16 - 1 then
-                cpt <= cpt + 1;
-            else cpt <= 0;
+            if s_cpt < c_2pow16 - 1 then
+                s_cpt <= s_cpt + 1;
+            else s_cpt <= 0;
             end if;
-        else cpt <= 0;
+        else s_cpt <= 0;
         end if;
     end if;
-    end process increment;
+    end process p_increment;
             
-    led_update : process (cpt) is
+    p_led_update : process (s_cpt) is
     begin
-        led <= std_logic_vector(to_unsigned(cpt, 16));
-    end process led_update;
+        led <= std_logic_vector(to_unsigned(s_cpt, 16));
+    end process p_led_update;
         
 
 end Behavioral;
