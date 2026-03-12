@@ -1,7 +1,13 @@
-# Debounce Module FPGA Project
+# FPGA Hardware Debouncer & Tester
 
 ## Overview
-This project implements a material debounce module using FPGA, which employs two different D flip-flops (DDF) to manage the stability of button inputs. The system detects and counts button clicks both with and without debounce, demonstrating the erratic behavior that occurs when debounce is not used. The results are visualized using a 16 LED counter, allowing for clear observation of the number of detected clicks. Additionally, a switch toggles between counting modes to compare the results of the two methods.
+This project implements a highly reliable, hardware-based **button debounce module** for FPGAs, alongside a **top-level tester module** to visually prove its effectiveness. 
+
+This system solves button bouncing by employing synchronization D flip-flops (to prevent metastability), a timer counter (to wait out the mechanical bounce), and an edge-detector (to output exactly one clean pulse). The top-level tester records both the "clean" presses and the "raw/bouncy" presses simultaneously. The results are visualized on 16 LEDs, allowing for a clear, real-time comparison between the two methods.
 
 ## Board
 This project is implemented on the Basys3 FPGA board.
+
+## Acknowledgements & Inspiration
+The architecture of the debounce logic was inspired by Alexey Sudbin's open-source UART_controller project, available [here on Hackster.io](https://www.hackster.io/alexey-sudbin/uart-interface-in-vhdl-for-basys3-board-eef170#code).
+
