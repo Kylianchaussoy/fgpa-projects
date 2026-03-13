@@ -32,16 +32,19 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity counter is
+generic (
+    CLK_DIVISOR1 : natural := 1_000_000;
+    CLK_DIVISOR2 : natural := 100_000
+);
     Port ( clk : in std_logic;
            switch2 : in std_logic;
            switch1 : in std_logic;
-           led : out std_logic_vector(15 downto 0));
+           led : out std_logic_vector(15 downto 0)
+           );
 end counter;
 
 architecture Behavioral of counter is
     constant c_2POW16 : natural :=  65536;
-    constant c_CLK_DIVISOR1 : natural := 1000000;
-    constant c_CLK_DIVISOR2 : natural := 100000;
     signal s_cpt : natural range 0 to c_2POW16 -1 := 0;
     signal s_clk_divided : std_logic := '0';
     signal s_clk_count : natural := 0;
@@ -52,8 +55,8 @@ begin
     begin
     if rising_edge(clk) then
         if switch2 = '1' then
-            v_divisor := c_CLK_DIVISOR2;
-        else v_divisor := c_CLK_DIVISOR1;
+            v_divisor := CLK_DIVISOR2;
+        else v_divisor := CLK_DIVISOR1;
         end if;
 
         s_clk_count <= s_clk_count +1;
