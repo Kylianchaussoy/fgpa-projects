@@ -32,6 +32,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity elevator_controller is
+  Generic (
+    CLK_DIVIDER : natural := 25000000 --2Hz
+  );
   Port ( 
     clk : in std_logic;
     switch : in std_logic_vector(15 downto 0);
@@ -47,7 +50,6 @@ signal s_next_state: t_elevator_state := IDLE;
 signal s_elevator_ptr : natural range 0 to c_MAX_FLOOR := 0;
 signal s_tick : std_logic := '0';
 signal s_clk_counter : natural := 0;
-constant c_CLK_DIVIDER : natural := 25000000; --2Hz
 
 begin
 
@@ -146,7 +148,7 @@ p_clock_divider : process (clk) is
 begin
     if rising_edge(clk) then
         s_tick <= '0';
-        if s_clk_counter < c_CLK_DIVIDER then
+        if s_clk_counter < CLK_DIVIDER then
             s_clk_counter <= s_clk_counter + 1;
         else 
             s_clk_counter <= 0;
@@ -182,7 +184,7 @@ end process elevator_update;
 
 p_led_update : process(s_elevator_ptr) is
 begin
-led <= "0000000000000000";
+led <= (others => '0');
 led(s_elevator_ptr) <= '1';
 end process p_led_update;
 
