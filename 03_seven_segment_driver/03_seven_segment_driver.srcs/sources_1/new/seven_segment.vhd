@@ -32,7 +32,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity seven_segment is
-  Port ( 
+Generic (
+    CLOCK_DIVIDER1 : natural := 100_000; --500Hz
+    CLOCK_DIVIDER2 : natural := 25_000_000 --2Hz
+);
+
+Port ( 
     clk : in std_logic;
     dp : out std_logic;
     an : out std_logic_vector(3 downto 0);
@@ -48,8 +53,6 @@ signal s_clock_counter2 : natural := 0;
 signal s_msg_ptr : integer range 0 to 6 := 6;
 signal s_char0, s_char1, s_char2, s_char3 : std_logic_vector(6 downto 0);
 
-constant c_CLOCK_DIVIDER1 : natural := 100000; --500Hz
-constant c_CLOCK_DIVIDER2 : natural := 25000000; --2Hz
 constant c_B : std_logic_vector(6 downto 0) := "0000000";
 constant c_A : std_logic_vector(6 downto 0) := "0001000";
 constant c_S : std_logic_vector(6 downto 0) := "0010010";
@@ -65,14 +68,14 @@ begin
     p_clock_divider : process (clk) is
     begin
     if rising_edge(clk) then
-        if s_clock_counter1 < c_CLOCK_DIVIDER1 then
+        if s_clock_counter1 < CLOCK_DIVIDER1 then
             s_clock_counter1 <= s_clock_counter1 + 1;
         else 
             s_clock_counter1 <= 0;
             s_slow_clk1 <= not s_slow_clk1;
         end if;
         
-        if s_clock_counter2 < c_CLOCK_DIVIDER2 then
+        if s_clock_counter2 < CLOCK_DIVIDER2 then
             s_clock_counter2 <= s_clock_counter2 + 1;
         else 
             s_clock_counter2 <= 0;
@@ -111,6 +114,6 @@ begin
                s_char2 when "1011",
                s_char1 when "1101",
                s_char0 when "1110",
-               "1111111" when others;
+               (others => '1') when others;
 
 end Behavioral;
