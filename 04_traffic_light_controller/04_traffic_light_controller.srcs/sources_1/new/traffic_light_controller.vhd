@@ -32,6 +32,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity traffic_light_controller is
+generic (
+    GREEN_DELAY      : natural := 4;
+    YELLOW_DELAY     : natural := 2;
+    DOUBLE_RED_DELAY : natural := 1
+);
+
   Port (
     clk : in std_logic;
     rst : in std_logic;
@@ -53,9 +59,6 @@ subtype t_delay_time is natural;
 constant c_RED : t_light_color := "001";
 constant c_YELLOW : t_light_color := "011";
 constant c_GREEN : t_light_color := "111";
-constant c_GREEN_DELAY  : t_delay_time := 5;
-constant c_YELLOW_DELAY : t_delay_time := 2;
-constant c_DOUBLE_RED_DELAY : t_delay_time := 1;
 
 begin
 
@@ -80,7 +83,7 @@ elsif(rising_edge(s_slow_clk)) then
     s_current_state <= s_next_state;
     if s_current_state /= s_next_state then
         s_delay <= 0;
-    elsif s_delay < c_GREEN_DELAY then
+    elsif s_delay < GREEN_DELAY - 1 then
         s_delay <= s_delay + 1;
     end if;
 end if; 
@@ -95,7 +98,7 @@ else
     when GREEN_RED =>
         led1 <= c_GREEN;
         led2 <= c_RED;
-        if s_delay >= c_GREEN_DELAY then
+        if s_delay >= GREEN_DELAY - 1 then
             s_next_state <= YELLOW_RED;
         else
             s_next_state <= GREEN_RED;
@@ -103,7 +106,7 @@ else
     when YELLOW_RED =>
         led1 <= c_YELLOW;
         led2 <= c_RED;
-        if s_delay >= c_YELLOW_DELAY then
+        if s_delay >= YELLOW_DELAY - 1 then
             s_next_state <= RED_RED_1;
         else
             s_next_state <= YELLOW_RED;
@@ -111,7 +114,7 @@ else
     when RED_RED_1 =>
         led1 <= c_RED;
         led2 <= c_RED;
-        if s_delay >= c_DOUBLE_RED_DELAY then
+        if s_delay >= DOUBLE_RED_DELAY - 1 then
             s_next_state <= RED_GREEN;
         else
             s_next_state <= RED_RED_1;
@@ -119,7 +122,7 @@ else
     when RED_GREEN =>
         led1 <= c_RED;
         led2 <= c_GREEN;
-        if s_delay >= c_GREEN_DELAY then
+        if s_delay >= GREEN_DELAY - 1 then
             s_next_state <= RED_YELLOW;
         else
             s_next_state <= RED_GREEN;
@@ -127,7 +130,7 @@ else
     when RED_YELLOW =>
         led1 <= c_RED;
         led2 <= c_YELLOW;
-        if s_delay >= c_YELLOW_DELAY then
+        if s_delay >= YELLOW_DELAY - 1 then
             s_next_state <= RED_RED_2;
         else
             s_next_state <= RED_YELLOW;
@@ -135,7 +138,7 @@ else
     when RED_RED_2 =>
         led1 <= c_RED;
         led2 <= c_RED;
-        if s_delay >= c_DOUBLE_RED_DELAY then
+        if s_delay >= DOUBLE_RED_DELAY - 1 then
             s_next_state <= GREEN_RED;
         else
             s_next_state <= RED_RED_2;
