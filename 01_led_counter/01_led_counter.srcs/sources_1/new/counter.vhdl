@@ -62,7 +62,7 @@ begin
         else v_divisor := CLK_DIVISOR1;
         end if;
 
-        if s_clk_count >= v_divisor then
+        if s_clk_count >= v_divisor - 1 then
             s_tick <= '1';
             s_clk_count <= 0;
         else
