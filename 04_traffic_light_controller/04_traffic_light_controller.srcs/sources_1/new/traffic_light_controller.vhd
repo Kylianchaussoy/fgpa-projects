@@ -46,13 +46,13 @@ generic (
 end traffic_light_controller;
 
 architecture Behavioral of traffic_light_controller is
-signal s_slow_clk : std_logic := '0';
+signal s_tick : std_logic := '0';
 signal s_delay : natural := 0;
 signal s_clk_counter : natural := 0;
 
 type t_lights_state is (GREEN_RED, RED_GREEN, YELLOW_RED, RED_YELLOW, RED_RED_1, RED_RED_2);
 signal s_current_state, s_next_state: t_lights_state;
-constant c_CLK_DIVIDER : natural := 50000000; --1Hz
+constant c_CLK_DIVIDER : natural := 100_000_000; --1Hz
 
 subtype t_light_color is std_logic_vector(2 downto 0);
 subtype t_delay_time is natural;
@@ -65,36 +65,38 @@ begin
 p_clock_divider : process (clk) is
 begin
 if rising_edge(clk) then
-    if s_clk_counter < c_CLK_DIVIDER then
-        s_clk_counter <= s_clk_counter + 1;
+    s_tick <= '0';
+    if s_clk_counter >= c_CLK_DIVIDER - 1 then
+       s_tick <= '1';
+       s_clk_counter <= 0;
     else 
-        s_clk_counter <= 0;
-        s_slow_clk <= not s_slow_clk;
+       s_clk_counter <= s_clk_counter + 1;
     end if;
 end if;
 end process p_clock_divider;
 
-process(s_slow_clk, rst) 
+process(clk) 
 begin
-if rst ='1' then
-    s_current_state <= GREEN_RED;
-    s_delay <= 0;
-elsif(rising_edge(s_slow_clk)) then 
-    s_current_state <= s_next_state;
-    if s_current_state /= s_next_state then
+if rising_edge(clk) then
+    if rst ='1' then
+        s_current_state <= GREEN_RED;
         s_delay <= 0;
-    elsif s_delay < GREEN_DELAY - 1 then
-        s_delay <= s_delay + 1;
+    elsif s_tick = '1' then
+        s_current_state <= s_next_state;
+        if s_next_state /= s_current_state then
+            s_delay <= 0;
+        elsif s_delay < GREEN_DELAY - 1 then -- green delay is the max
+            s_delay <= s_delay + 1;
+        end if;
     end if;
-end if; 
+end if;
 end process;
 
-p_fsm : process (s_current_state, s_delay, rst) is
+p_fsm : process (s_current_state, s_delay) is
 begin
-if rst = '1' then
-   s_next_state <= GREEN_RED;
-else
-    case s_current_state is
+led1 <= c_RED;
+led2 <= c_RED;
+case s_current_state is
     when GREEN_RED =>
         led1 <= c_GREEN;
         led2 <= c_RED;
@@ -145,8 +147,7 @@ else
         end if;
     when others =>
         s_next_state <= s_current_state;
-    end case;
-end if;
+end case;
 end process p_fsm;
 
 end Behavioral;
