@@ -181,12 +181,10 @@ begin
     end if; 
 end process elevator_update;
 
-
 p_led_update : process(s_elevator_ptr) is
 begin
 led <= (others => '0');
 led(s_elevator_ptr) <= '1';
 end process p_led_update;
-
 
 end Behavioral;
