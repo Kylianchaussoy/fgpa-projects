@@ -33,8 +33,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity seven_segment is
 Generic (
-    CLOCK_DIVIDER1 : natural := 100_000; --500Hz
-    CLOCK_DIVIDER2 : natural := 25_000_000 --2Hz
+    CLOCK_DIVIDER1 : natural := 100_000; --1000Hz
+    CLOCK_DIVIDER2 : natural := 50_000_000 --2Hz
 );
 
 Port ( 
@@ -45,11 +45,11 @@ Port (
 end seven_segment;
 
 architecture Behavioral of seven_segment is
-signal s_slow_clk1 : std_logic := '0';
-signal s_slow_clk2 : std_logic := '0';
 signal s_an : std_logic_vector(3 downto 0) := "1110";
 signal s_clock_counter1 : natural := 0;
 signal s_clock_counter2 : natural := 0;
+signal s_tick1 : std_logic := '0';
+signal s_tick2 : std_logic := '0';
 signal s_msg_ptr : integer range 0 to 6 := 6;
 signal s_char0, s_char1, s_char2, s_char3 : std_logic_vector(6 downto 0);
 
@@ -68,39 +68,42 @@ begin
     p_clock_divider : process (clk) is
     begin
     if rising_edge(clk) then
-        if s_clock_counter1 < CLOCK_DIVIDER1 then
-            s_clock_counter1 <= s_clock_counter1 + 1;
-        else 
+        s_tick1 <= '0';
+        if s_clock_counter1 >= CLOCK_DIVIDER1 then
+            s_tick1 <= '1';
             s_clock_counter1 <= 0;
-            s_slow_clk1 <= not s_slow_clk1;
+        else 
+            s_clock_counter1 <= s_clock_counter1 + 1;
         end if;
         
-        if s_clock_counter2 < CLOCK_DIVIDER2 then
-            s_clock_counter2 <= s_clock_counter2 + 1;
-        else 
+        s_tick2 <= '0';
+        if s_clock_counter2 >= CLOCK_DIVIDER2 then
+            s_tick2 <= '1';
             s_clock_counter2 <= 0;
-            s_slow_clk2 <= not s_slow_clk2;
+        else 
+            s_clock_counter2 <= s_clock_counter2 + 1;
         end if;
     end if;
     end process p_clock_divider;
-        
-    p_4_displays : process (s_slow_clk1) is
-    begin
-    if rising_edge(s_slow_clk1) then
-        s_an <= s_an(2 downto 0) & s_an(3);
-    end if;
-    end process p_4_displays;
     
-    p_scroll : process(s_slow_clk2)
+    process (clk)
     begin
-        if rising_edge(s_slow_clk2) then
+    if rising_edge(clk) then
+        -- display all 4 digit
+        if s_tick1 = '1' then
+            s_an <= s_an(2 downto 0) & s_an(3);
+        end if;
+        
+        -- scroll message
+        if s_tick2 = '1' then
             if s_msg_ptr = 0 then
                 s_msg_ptr <= 6;
             else
                 s_msg_ptr <= s_msg_ptr - 1;
             end if;
         end if;
-    end process p_scroll;
+    end if;
+    end process p_4_displays;
     
     an <= s_an;
     
