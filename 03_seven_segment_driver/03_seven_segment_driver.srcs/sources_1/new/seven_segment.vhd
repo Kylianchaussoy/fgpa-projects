@@ -69,7 +69,7 @@ begin
     begin
     if rising_edge(clk) then
         s_tick1 <= '0';
-        if s_clock_counter1 >= CLOCK_DIVIDER1 then
+        if s_clock_counter1 >= CLOCK_DIVIDER1 - 1 then
             s_tick1 <= '1';
             s_clock_counter1 <= 0;
         else 
@@ -77,7 +77,7 @@ begin
         end if;
         
         s_tick2 <= '0';
-        if s_clock_counter2 >= CLOCK_DIVIDER2 then
+        if s_clock_counter2 >= CLOCK_DIVIDER2 - 1 then
             s_tick2 <= '1';
             s_clock_counter2 <= 0;
         else 
@@ -103,7 +103,7 @@ begin
             end if;
         end if;
     end if;
-    end process p_4_displays;
+    end process;
     
     an <= s_an;
     
