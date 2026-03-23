@@ -75,29 +75,29 @@ end process;
 process
 begin
     rst <= '1';
-    wait for 20 ns;
+    wait for 45 ns;
     rst <= '0';
     wait for 20 ns;
     
-    assert(led1 = c_GREEN and led2 = c_RED) severity failure;
+    assert(led1 = c_GREEN and led2 = c_RED) report "failed at green-red start" severity failure;
     wait for 4 * SIM_SEC;
     
-    assert(led1 = c_YELLOW and led2 = c_RED) severity failure;
+    assert(led1 = c_YELLOW and led2 = c_RED) report "failed at yellow-red" severity failure;
     wait for 2 * SIM_SEC;
     
-    assert(led1 = c_RED and led2 = c_RED) severity failure;
+    assert(led1 = c_RED and led2 = c_RED) report "failed at red-red 1" severity failure;
     wait for 1 * SIM_SEC;
     
-    assert(led1 = c_RED  and led2 = c_GREEN) severity failure;
+    assert(led1 = c_RED  and led2 = c_GREEN) report "failed at red-green" severity failure;
     wait for 4 * SIM_SEC;
     
-    assert(led1 = c_RED  and led2 = c_YELLOW) severity failure;
+    assert(led1 = c_RED  and led2 = c_YELLOW) report "failed at red-yellow" severity failure;
     wait for 2 * SIM_SEC;
     
-    assert(led1 = c_RED  and led2 = c_RED) severity failure;
+    assert(led1 = c_RED  and led2 = c_RED) report "failed at red-red 2" severity failure;
     wait for 1 * SIM_SEC;
     
-    assert(led1 = c_GREEN and led2 = c_RED) severity failure;
+    assert(led1 = c_GREEN and led2 = c_RED) report "failed at green-red end" severity failure;
         
     report "simulation complete";
     wait;
