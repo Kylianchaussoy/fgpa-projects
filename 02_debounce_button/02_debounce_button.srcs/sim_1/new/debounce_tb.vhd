@@ -80,4 +80,29 @@ begin
 
 end process stimulus;
 
+
+monitor_output : process
+begin
+    wait until button_in = '1'; 
+    
+    for i in 1 to 2_000_000 loop
+        wait until rising_edge(clk);
+        assert (button_out = '0') 
+            report "press detected during bouncing phase" 
+            severity failure;
+    end loop;
+
+    wait until button_out = '1';
+    report "pulse detected";
+    
+    wait until rising_edge(clk);
+    wait for 1 ns;
+    assert (button_out = '0') 
+        report "pulse lasted longer than one clock cycle"
+        severity failure;
+    wait;
+        
+end process monitor_output;
+
+
 end Behavioral;
