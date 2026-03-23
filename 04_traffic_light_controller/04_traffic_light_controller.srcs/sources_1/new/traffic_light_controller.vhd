@@ -35,7 +35,8 @@ entity traffic_light_controller is
 generic (
     GREEN_DELAY      : natural := 4;
     YELLOW_DELAY     : natural := 2;
-    DOUBLE_RED_DELAY : natural := 1
+    DOUBLE_RED_DELAY : natural := 1;
+    CLK_DIVIDER : natural := 100_000_000 --1Hz
 );
 
   Port (
@@ -52,7 +53,6 @@ signal s_clk_counter : natural := 0;
 
 type t_lights_state is (GREEN_RED, RED_GREEN, YELLOW_RED, RED_YELLOW, RED_RED_1, RED_RED_2);
 signal s_current_state, s_next_state: t_lights_state;
-constant c_CLK_DIVIDER : natural := 100_000_000; --1Hz
 
 subtype t_light_color is std_logic_vector(2 downto 0);
 subtype t_delay_time is natural;
@@ -66,7 +66,7 @@ p_clock_divider : process (clk) is
 begin
 if rising_edge(clk) then
     s_tick <= '0';
-    if s_clk_counter >= c_CLK_DIVIDER - 1 then
+    if s_clk_counter >= CLK_DIVIDER - 1 then
        s_tick <= '1';
        s_clk_counter <= 0;
     else 
