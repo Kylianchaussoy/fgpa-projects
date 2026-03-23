@@ -35,7 +35,7 @@ entity debounce_tb is
 --  Port ( );
 end debounce_tb;
 
-architecture Behavioral of debounce_tb is
+architecture test of debounce_tb is
 signal clk : std_logic := '0';
 signal rst : std_logic := '0';
 signal button_in : std_logic := '0';
@@ -55,9 +55,9 @@ debounce_button_inst : entity work.debounce_button(Behavioral)
 stimulus : process
 begin
     rst <= '1';
-    wait for 20ns;
+    wait for 20 ns;
     rst <= '0';
-    wait for 20ns;
+    wait for 20 ns;
     
     report "starting noisy press";
     for i in 1 to 1_000_000 loop
@@ -105,4 +105,4 @@ begin
 end process monitor_output;
 
 
-end Behavioral;
+end test;
