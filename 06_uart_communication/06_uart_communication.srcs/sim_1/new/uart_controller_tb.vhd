@@ -60,7 +60,7 @@ begin
     wait for CLK_PERIOD/2;
 end process;
 
-uart_rx_inst : entity work.uart_controller(Structural)
+uart_controller_inst : entity work.uart_controller(Structural)
     port map(
         clk => clk,
         rst => rst,
