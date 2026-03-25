@@ -58,10 +58,10 @@ signal s_state : t_state := IDLE;
 signal s_tx_shift : std_logic_vector(7 downto 0) := (others => '0');
 signal s_rx_shift : std_logic_vector(7 downto 0) := (others => '0');
 
-signal s_clk_counter  : natural range 0 to CLK_DIV - 1 := 0;
+signal s_clk_counter : natural range 0 to CLK_DIV - 1 := 0;
 
-signal s_sclk     : std_logic := '0';
-signal s_sclk_rising  : std_logic := '0';
+signal s_sclk : std_logic := '0';
+signal s_sclk_rising : std_logic := '0';
 signal s_sclk_falling : std_logic := '0';
     
 signal s_bit_count : natural range 0 to 7 := 0;
