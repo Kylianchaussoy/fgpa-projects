@@ -52,7 +52,6 @@ architecture Behavioral of debounce_button is
     signal s_ff1 : std_logic := '0';
     signal s_ff2 : std_logic := '0';
     signal s_ff3 : std_logic := '0';
-    signal s_count_start : std_logic := '0';
     signal s_count : natural range 0 to COUNTER_SIZE := 0;
     
 begin
