@@ -17,8 +17,10 @@ Port (
     is_burst : in std_logic;
     
     -- I2C pins
-    sda : inout std_logic;
-    scl : inout std_logic
+    sda_in : in std_logic;
+    sda_out : out std_logic;
+    sda_en : out std_logic;
+    scl : out std_logic
 );
 end i2c_master;
 
@@ -39,9 +41,6 @@ signal scl_falling : std_logic := '0';
 
 signal clk_counter : natural range 0 to CLK_DIV - 1 := 0;
 
-signal sda_out : std_logic := '1';
-signal sda_en : std_logic := '0';
-
 signal data_reg : std_logic_vector(7 downto 0) := (others => '0');
 signal addr_reg : std_logic_vector(7 downto 0) := SLAVE_ADDRESS & '0';
 signal bit_count : natural range 0 to 7 := 0;
@@ -49,7 +48,6 @@ signal is_read : std_logic := '0';
 
 begin
 
-sda <= sda_out when sda_en = '1' else 'Z';
 scl <= s_scl;
 
 scl_gen : process(clk)
@@ -141,9 +139,8 @@ begin
                 end if;
                 
             when RECEIVE_ADDR_ACK  =>
-                sda_en <= '0';
                 if scl_rising = '1' then
-                    if sda = '0' then
+                    if sda_in = '0' then
                         if is_read = '0' then
                             state <= WRITE_DATA;
                         else
@@ -154,10 +151,13 @@ begin
                     end if;
                 end if;
                 
+                if scl_falling = '1' then
+                    sda_en <= '0';
+                end if;
+                
             when READ_DATA  =>
-                sda_en <= '0';
                 if scl_rising = '1' then
-                    data_reg <= data_reg(6 downto 0) & sda;
+                    data_reg <= data_reg(6 downto 0) & sda_in;
                     
                     if bit_count = 7 then
                         state <= SEND_DATA_ACK;
@@ -165,6 +165,10 @@ begin
                     else
                         bit_count <= bit_count + 1;
                     end if;
+                end if;
+                
+                if scl_falling = '1' then
+                    sda_en <= '0';
                 end if;
                 
             when SEND_DATA_ACK =>
@@ -197,9 +201,8 @@ begin
                 end if;
                 
             when READ_DATA_ACK =>
-                sda_en <= '0';
                 if scl_rising = '1' then
-                    if sda = '1' then
+                    if sda_in = '1' then
                         state <= SEND_STOP_1;
                     else
                         if is_burst = '1' then
@@ -209,6 +212,10 @@ begin
                             state <= SEND_STOP_1;
                         end if;
                     end if;
+                end if;
+                
+                if scl_falling = '1' then
+                    sda_en <= '0';
                 end if;
                 
             when WAIT_RISING_EDGE =>

@@ -13,7 +13,10 @@ Port (
     rst : in std_logic;
     
     -- I2C pins
-    sda : inout std_logic;
+    -- sda : inout std_logic;
+    sda_in : in std_logic;
+    sda_out : out std_logic;
+    sda_en : out std_logic;
     scl : in std_logic
 );
 end i2c_slave;
@@ -28,8 +31,6 @@ type t_state is ( IDLE,
 signal state : t_state := IDLE;
 signal state_after_wait : t_state := IDLE;
 
-signal sda_out : std_logic := '1';
-signal sda_en : std_logic := '0';
 signal scl_prev : std_logic := '0';
 signal sda_prev : std_logic := '0';
 
@@ -41,8 +42,6 @@ signal data : std_logic_vector(7 downto 0) := "11000011"; -- random data
 
 begin
 
-sda <= sda_out when sda_en = '1' else 'Z';
-
 process(clk)
 begin
     if rising_edge(clk) then
@@ -52,16 +51,16 @@ begin
             bit_count <= 0;
         else
             scl_prev <= scl;
-            sda_prev <= sda;
+            sda_prev <= sda_in;
             
             -- detect start/restart condition
-            if (sda_prev = '1' and sda = '0' and scl = '1') then
+            if (sda_prev = '1' and sda_in = '0' and scl = '1') then
                 state <= READ_ADDRESS;
                 bit_count <= 0;
                 data_reg <= data;
                 
             -- detect stop condition
-            elsif (sda_prev = '0' and sda = '1' and scl = '1') then
+            elsif (sda_prev = '0' and sda_in = '1' and scl = '1') then
                 state <= IDLE;
             else
                 case state is
@@ -70,15 +69,18 @@ begin
                     sda_en <= '0';
                     
                 when READ_ADDRESS =>
-                    sda_en <= '0';
                     if (scl_prev = '0' and scl = '1') then
-                        addr_reg <= addr_reg(6 downto 0) & sda;
+                        addr_reg <= addr_reg(6 downto 0) & sda_in;
                         if bit_count = 7 then
                             state <= SEND_ADDR_ACK;
                             bit_count <= 0;
                         else
                             bit_count <= bit_count + 1;
                         end if;
+                    end if;
+                    
+                    if (scl_prev = '1' and scl = '0') then
+                        sda_en <= '0';
                     end if;
                     
                 when SEND_ADDR_ACK  =>
@@ -98,9 +100,8 @@ begin
                     end if;
                 
                 when READ_DATA  =>
-                    sda_en <= '0';
                     if (scl_prev = '0' and scl = '1') then
-                        data_reg <= data_reg(6 downto 0) & sda;
+                        data_reg <= data_reg(6 downto 0) & sda_in;
                         if bit_count = 7 then
                             state <= SEND_DATA_ACK;
                             bit_count <= 0;
@@ -108,13 +109,22 @@ begin
                             bit_count <= bit_count + 1;
                         end if;
                     end if;
+                    
+                    if (scl_prev = '1' and scl = '0') then
+                        sda_en <= '0';
+                    end if;
                 
                 when SEND_DATA_ACK =>
                     if (scl_prev = '1' and scl = '0') then
                         sda_en <= '1';
-                        sda_out <= '0';
-                        state <= WAIT_RISING_EDGE;
-                        state_after_wait <= READ_DATA;
+                        if data_reg = "10011001" then -- to test nack
+                            sda_out <= '1';
+                            state <= IDLE;
+                        else
+                            sda_out <= '0';
+                            state <= WAIT_RISING_EDGE;
+                            state_after_wait <= READ_DATA;
+                        end if;
                     end if;
                     
                 when WRITE_DATA  =>
@@ -133,14 +143,17 @@ begin
                     end if;
 
                 when READ_DATA_ACK =>
-                    sda_en <= '0';
                     if (scl_prev = '0' and scl = '1') then
-                        if sda = '1' then
+                        if sda_in = '1' then
                             state <= IDLE;
                         else
                             state <= WRITE_DATA;
                             data_reg <= data;
                         end if;
+                    end if;
+                    
+                    if (scl_prev = '1' and scl = '0') then
+                        sda_en <= '0';
                     end if;
                     
                 when WAIT_RISING_EDGE =>
