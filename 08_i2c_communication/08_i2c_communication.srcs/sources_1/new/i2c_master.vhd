@@ -20,7 +20,8 @@ Port (
     sda_in : in std_logic;
     sda_out : out std_logic;
     sda_en : out std_logic;
-    scl : out std_logic
+    scl_in : in std_logic;
+    scl_out : out std_logic
 );
 end i2c_master;
 
@@ -45,27 +46,37 @@ signal data_reg : std_logic_vector(7 downto 0) := (others => '0');
 signal addr_reg : std_logic_vector(7 downto 0) := SLAVE_ADDRESS & '0';
 signal bit_count : natural range 0 to 7 := 0;
 signal is_read : std_logic := '0';
+signal is_clock_stretching : std_logic := '0';
 
 begin
 
-scl <= s_scl;
+scl_out <= s_scl;
 
 scl_gen : process(clk)
 begin
     if rising_edge(clk) then
         scl_rising  <= '0';
         scl_falling <= '0';
-    
+        
         if rst = '1' or state = IDLE then
             clk_counter <= 0;
             s_scl <= '1';
         else
-            if clk_counter = CLK_DIV - 1 then
+            if is_clock_stretching = '1' then
+                if scl_in = '1' then
+                    is_clock_stretching <= '0';
+                    scl_rising  <= '1';
+                end if;
+            elsif clk_counter = CLK_DIV - 1 then
                 clk_counter <= 0;
                 s_scl <= not s_scl;
      
                 if s_scl = '0' then
                     scl_rising  <= '1';
+                    if scl_in = '0' then
+                        is_clock_stretching <= '1';
+                        scl_rising  <= '0';
+                    end if;
                 else
                     scl_falling <= '1';
                 end if;
