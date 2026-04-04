@@ -70,7 +70,7 @@ begin
             sda_in => slave_sda_in,
             sda_out => slave_sda_out,
             sda_en => slave_sda_en,
-            scl => slave_scl_in,
+            scl_in => slave_scl_in,
             scl_out => slave_scl_out
         );
     
