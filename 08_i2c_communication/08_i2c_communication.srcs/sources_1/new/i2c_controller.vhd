@@ -2,6 +2,9 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity i2c_controller is
+  Generic (
+      SIM_DEBOUNCE_COUNTER : integer := 1_000_000
+  );
   Port (
     clk : in std_logic;
     rst : in std_logic;
@@ -75,6 +78,9 @@ begin
         );
     
     start_write_debounce : entity work.debounce_button
+        generic map (
+            COUNTER_SIZE => SIM_DEBOUNCE_COUNTER
+        )
         port map(
             clk => clk,
             rst => rst,
@@ -83,6 +89,9 @@ begin
         );
         
     start_read_debounce : entity work.debounce_button
+        generic map (
+            COUNTER_SIZE => SIM_DEBOUNCE_COUNTER
+        )
         port map(
             clk => clk,
             rst => rst,
