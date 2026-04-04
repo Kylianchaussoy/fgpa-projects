@@ -11,7 +11,7 @@ Generic (
 Port (
     clk : in std_logic;
     rst : in std_logic;
-    clock_stretching : in std_logic;
+    clock_stretching_en : in std_logic;
     
     -- I2C pins
     sda_in : in std_logic;
@@ -39,23 +39,29 @@ signal data_reg : std_logic_vector(7 downto 0) := (others => '0');
 signal addr_reg : std_logic_vector(7 downto 0) := (others => '0');
 signal bit_count : natural range 0 to 7 := 0;
 
-signal data : std_logic_vector(7 downto 0) := "11010011"; -- random data
-
+constant DATA_TO_SEND : std_logic_vector(7 downto 0) := "11010011"; -- random data
+constant NACK_TEST_BYTE : std_logic_vector(7 downto 0) := "10011001"; -- random data
+ 
 begin
 
 process(clk)
 begin
     if rising_edge(clk) then
         if rst = '1' then
-            state <= IDLE;
             sda_en <= '0';
-            bit_count <= 0;
             scl_out <= '1';
+            state <= IDLE;
+            state_after_wait <= IDLE;
+            scl_prev <= '0';
+            sda_prev <= '0';
+            data_reg <= (others => '0');
+            addr_reg <= (others => '0');
+            bit_count <= 0;
         else
             scl_prev <= scl_in;
             sda_prev <= sda_in;
             
-            if clock_stretching = '1' then
+            if clock_stretching_en = '1' then
                 if scl_in = '0' then
                     scl_out <= '0';
                 end if;
@@ -67,7 +73,7 @@ begin
             if (sda_prev = '1' and sda_in = '0' and scl_in = '1') then
                 state <= READ_ADDRESS;
                 bit_count <= 0;
-                data_reg <= data;
+                data_reg <= DATA_TO_SEND;
                 
             -- detect stop condition
             elsif (sda_prev = '0' and sda_in = '1' and scl_in = '1') then
@@ -127,7 +133,7 @@ begin
                 when SEND_DATA_ACK =>
                     if (scl_prev = '1' and scl_in = '0') then
                         sda_en <= '1';
-                        if data_reg = "10011001" then -- to test nack
+                        if data_reg = NACK_TEST_BYTE then -- to test nack
                             sda_out <= '1';
                             state <= IDLE;
                         else
@@ -158,7 +164,7 @@ begin
                             state <= IDLE;
                         else
                             state <= WRITE_DATA;
-                            data_reg <= data;
+                            data_reg <= DATA_TO_SEND;
                         end if;
                     end if;
                     

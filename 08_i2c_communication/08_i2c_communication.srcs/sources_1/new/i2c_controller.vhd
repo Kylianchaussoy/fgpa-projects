@@ -7,8 +7,8 @@ entity i2c_controller is
     rst : in std_logic;
     data_in : in std_logic_vector(7 downto 0);
     data_out : out std_logic_vector(7 downto 0);
-    is_burst : in std_logic;
-    clock_stretching : in std_logic;
+    burst_en : in std_logic;
+    clock_stretching_en : in std_logic;
     start_read : in std_logic;
     start_write : in std_logic;
     busy : out std_logic
@@ -54,7 +54,7 @@ begin
             start_read => s_start_read,
             start_write => s_start_write,
             busy => busy,
-            is_burst => is_burst,
+            burst_en => burst_en,
             sda_in => master_sda_in,
             sda_out => master_sda_out,
             sda_en => master_sda_en,
@@ -66,7 +66,7 @@ begin
         port map(
             clk => clk,
             rst => rst,
-            clock_stretching => clock_stretching,
+            clock_stretching_en => clock_stretching_en,
             sda_in => slave_sda_in,
             sda_out => slave_sda_out,
             sda_en => slave_sda_en,

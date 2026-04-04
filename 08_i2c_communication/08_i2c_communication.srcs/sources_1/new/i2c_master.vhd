@@ -14,7 +14,7 @@ Port (
     start_read : in std_logic;
     start_write : in std_logic;
     busy : out std_logic;
-    is_burst : in std_logic;
+    burst_en : in std_logic;
     
     -- I2C pins
     sda_in : in std_logic;
@@ -39,14 +39,13 @@ signal state_after_wait : t_state := IDLE;
 signal s_scl : std_logic := '1';
 signal scl_rising : std_logic := '0';
 signal scl_falling : std_logic := '0';
-
 signal clk_counter : natural range 0 to CLK_DIV - 1 := 0;
+signal is_clock_stretching : std_logic := '0';
 
 signal data_reg : std_logic_vector(7 downto 0) := (others => '0');
 signal addr_reg : std_logic_vector(7 downto 0) := SLAVE_ADDRESS & '0';
 signal bit_count : natural range 0 to 7 := 0;
 signal is_read : std_logic := '0';
-signal is_clock_stretching : std_logic := '0';
 
 begin
 
@@ -57,10 +56,11 @@ begin
     if rising_edge(clk) then
         scl_rising  <= '0';
         scl_falling <= '0';
-        
+
         if rst = '1' or state = IDLE then
-            clk_counter <= 0;
             s_scl <= '1';
+            clk_counter <= 0;
+            is_clock_stretching <= '0';
         else
             if is_clock_stretching = '1' then
                 if scl_in = '1' then
@@ -92,6 +92,12 @@ begin
     if rising_edge(clk) then
         if rst = '1' then
             state <= IDLE;
+            state_after_wait <= IDLE;
+            data_reg <= (others => '0');
+            addr_reg <= SLAVE_ADDRESS & '0';
+            bit_count <= 0;
+            is_read <= '0';
+            data_out <= (others => '0');
         else
             case state is
             
@@ -186,7 +192,7 @@ begin
                 data_out <= data_reg;
                 if scl_falling = '1' then
                     sda_en <= '1';
-                    if is_burst = '1' then
+                    if burst_en = '1' then
                         sda_out <= '0';
                         state <= WAIT_RISING_EDGE;
                         state_after_wait <= READ_DATA;
@@ -216,7 +222,7 @@ begin
                     if sda_in = '1' then
                         state <= SEND_STOP_1;
                     else
-                        if is_burst = '1' then
+                        if burst_en = '1' then
                             data_reg <= data_in;
                             state <= WRITE_DATA;
                         else
