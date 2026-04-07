@@ -2,19 +2,19 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity CPU_TB is
-end entity CPU_TB;
+entity cpu_tb is
+end entity cpu_tb;
 
-architecture test of CPU_TB is
+architecture test of cpu_tb is
 
-    component CPU_Top is
-        port (
+    component cpu_top is
+        Port (
             clk : in std_logic;
             rst : in std_logic;
-            dbg_pc : out std_logic(7 downto 0);
-            dbg_r1 : out std_logic(7 downto 0);
-            dbg_r2 : out std_logic(7 downto 0);
-            dbg_alu : out std_logic(7 downto 0);
+            dbg_pc : out std_logic_vector(7 downto 0);
+            dbg_r1 : out std_logic_vector(7 downto 0);
+            dbg_r2 : out std_logic_vector(7 downto 0);
+            dbg_alu : out std_logic_vector(7 downto 0);
             halted : out std_logic
         );
     end component;
