@@ -8,8 +8,8 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity seven_seg is
     port (
-        clk : in  std_logic;
-        data_in : in  std_logic_vector(15 downto 0);
+        clk : in std_logic;
+        data_in : in std_logic_vector(15 downto 0);
         seg : out std_logic_vector(6 downto 0);
         an : out std_logic_vector(3 downto 0)
     );
