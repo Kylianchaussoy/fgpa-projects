@@ -176,7 +176,9 @@ begin
             when OP_LUI =>
                 reg_wr <= '1';
                 imm32 <= imm_u;
-                wb_sel <= "11";
+                use_imm <= '1';
+                alu_op <= ALU_COPY_B; 
+                wb_sel <= "00";
 
             when OP_AUIPC =>
                 reg_wr <= '1';

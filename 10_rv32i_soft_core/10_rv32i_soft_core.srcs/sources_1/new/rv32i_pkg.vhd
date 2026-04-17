@@ -2,9 +2,9 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
  
 package rv32i_pkg is
-    type alu_op_t is (ALU_ADD, ALU_SUB, ALU_AND, ALU_OR, ALU_XOR, ALU_SLL, ALU_SRL, ALU_SRA, ALU_SLT, ALU_SLTU, ALU_NONE);
+    type alu_op_t is (ALU_ADD, ALU_SUB, ALU_AND, ALU_OR, ALU_XOR, ALU_SLL, ALU_SRL, ALU_SRA, ALU_SLT, ALU_SLTU, ALU_COPY_B, ALU_NONE);
 
-    type branch_op_t is (BEQ, BNE, BLT, BGE, BLTU, BGEU, NO_BRANCH);
+    type branch_op_t is (NO_BRANCH, BEQ, BNE, BLT, BGE, BLTU, BGEU);
 
     constant OP_R_TYPE  : std_logic_vector(6 downto 0) := "0110011";
     constant OP_I_TYPE  : std_logic_vector(6 downto 0) := "0010011";

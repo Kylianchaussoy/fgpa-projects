@@ -8,7 +8,7 @@ entity branch_unit is
     Port (
         a : in  std_logic_vector(XLEN-1 downto 0);
         b : in  std_logic_vector(XLEN-1 downto 0);
-        branch_op : in  branch_op_t;
+        branch_op : in branch_op_t;
         branch_taken : out std_logic
     );
 end entity branch_unit;

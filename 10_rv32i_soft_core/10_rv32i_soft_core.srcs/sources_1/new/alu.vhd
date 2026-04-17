@@ -6,9 +6,9 @@ use work.rv32i_pkg.all;
 entity alu is
     Generic (XLEN : integer := 32);
     Port (
-    a, b : in std_logic_vector(XLEN-1 downto 0);
-    alu_op : in alu_op_t;
-    res : out std_logic_vector(XLEN-1 downto 0)
+        a, b : in std_logic_vector(XLEN-1 downto 0);
+        alu_op : in alu_op_t;
+        res : out std_logic_vector(XLEN-1 downto 0)
     );
 end alu;
 
@@ -31,6 +31,7 @@ begin
         when ALU_SLL => v_res := shift_left(unsigned(a), shift_amt);
         when ALU_SRL => v_res := shift_right(unsigned(a), shift_amt);
         when ALU_SRA => v_res := unsigned(shift_right(signed(a), shift_amt));
+        when ALU_COPY_B => v_res := unsigned(b);
         when ALU_SLT =>
             if signed(a) < signed(b) then
                 v_res := (31 downto 1 => '0') & '1';
