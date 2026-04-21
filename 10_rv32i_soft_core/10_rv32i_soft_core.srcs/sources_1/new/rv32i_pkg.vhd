@@ -37,4 +37,6 @@ package rv32i_pkg is
     constant F3_SH  : std_logic_vector(2 downto 0) := "001";
     constant F3_SW  : std_logic_vector(2 downto 0) := "010";
 
+    constant NOP :std_logic_vector(31 downto 0) := x"00000013";
+
 end package rv32i_pkg;

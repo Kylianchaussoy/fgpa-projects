@@ -13,13 +13,15 @@ end pipelined_cpu;
 architecture Behavioral of pipelined_cpu is
 
     signal if_pc_out : std_logic_vector(31 downto 0);
-    signal if_instruction : std_logic_vector(31 downto 0);
 
     type if_id_reg_type is record
-        pc          : std_logic_vector(31 downto 0);
-        instruction : std_logic_vector(31 downto 0);
+        pc : std_logic_vector(31 downto 0);
     end record;
     signal if_id_reg : if_id_reg_type;
+
+    signal sync_imem_out : std_logic_vector(31 downto 0);
+    signal id_instruction_in : std_logic_vector(31 downto 0);
+    signal flush_delay : std_logic;
 
     signal id_rs1_addr  : std_logic_vector(4 downto 0);
     signal id_rs2_addr  : std_logic_vector(4 downto 0);
@@ -84,12 +86,11 @@ architecture Behavioral of pipelined_cpu is
     signal mem_rd_data : std_logic_vector(31 downto 0);
 
     type mem_wb_reg_type is record
-        alu_res    : std_logic_vector(31 downto 0);
-        mem_data   : std_logic_vector(31 downto 0);
-        rd_addr    : std_logic_vector(4 downto 0);
-        pc_plus4   : std_logic_vector(31 downto 0);
-        reg_wr     : std_logic;
-        wb_sel     : std_logic_vector(1 downto 0);
+        alu_res  : std_logic_vector(31 downto 0);
+        rd_addr  : std_logic_vector(4 downto 0);
+        pc_plus4 : std_logic_vector(31 downto 0);
+        reg_wr   : std_logic;
+        wb_sel   : std_logic_vector(1 downto 0);
     end record;
     signal mem_wb_reg : mem_wb_reg_type;
 
@@ -126,26 +127,29 @@ begin
 
     instr_mem_inst: entity work.instruction_memory
         port map (
+            clk   => clk,
+            en    => not stall,
             addr  => if_pc_out,
-            instr => if_instruction
+            instr => sync_imem_out
         );
 
     process(clk)
     begin
         if rising_edge(clk) then
+            flush_delay <= flush;
             if rst = '1' or flush = '1' then
-                if_id_reg.pc          <= (others => '0');
-                if_id_reg.instruction <= (others => '0');
+                if_id_reg.pc <= (others => '0');
             elsif stall = '0' then
-                if_id_reg.pc          <= if_pc_out;
-                if_id_reg.instruction <= if_instruction;
+                if_id_reg.pc <= if_pc_out;
             end if;
         end if;
     end process;
 
+    id_instruction_in <= NOP when (flush_delay = '1' or rst = '1') else sync_imem_out;
+
     instruction_decoder_inst: entity work.instruction_decoder
         port map (
-            instruction => if_id_reg.instruction,
+            instruction => id_instruction_in,
             rd_addr     => id_rd_addr,
             rs1_addr    => id_rs1_addr,
             rs2_addr    => id_rs2_addr,
@@ -330,14 +334,12 @@ begin
         if rising_edge(clk) then
             if rst = '1' then
                 mem_wb_reg.alu_res  <= (others => '0');
-                mem_wb_reg.mem_data <= (others => '0');
                 mem_wb_reg.rd_addr  <= (others => '0');
                 mem_wb_reg.pc_plus4 <= (others => '0');
                 mem_wb_reg.reg_wr   <= '0';
                 mem_wb_reg.wb_sel   <= (others => '0');
             else
                 mem_wb_reg.alu_res  <= ex_mem_reg.alu_res;
-                mem_wb_reg.mem_data <= mem_rd_data;
                 mem_wb_reg.rd_addr  <= ex_mem_reg.rd_addr;
                 mem_wb_reg.pc_plus4 <= ex_mem_reg.pc_plus4;
                 mem_wb_reg.reg_wr   <= ex_mem_reg.reg_wr;
@@ -347,7 +349,7 @@ begin
     end process;
 
     wb_wr_data <= mem_wb_reg.alu_res  when mem_wb_reg.wb_sel = "00" else
-                  mem_wb_reg.mem_data when mem_wb_reg.wb_sel = "01" else
+                  mem_rd_data         when mem_wb_reg.wb_sel = "01" else
                   mem_wb_reg.pc_plus4 when mem_wb_reg.wb_sel = "10" else
                   (others => '0');
 

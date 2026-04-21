@@ -4,6 +4,8 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity instruction_memory is
     Port (
+        clk   : in std_logic;
+        en    : in std_logic;
         addr  : in  std_logic_vector(31 downto 0);
         instr : out std_logic_vector(31 downto 0)
     );
@@ -118,6 +120,13 @@ architecture Behavioral of instruction_memory is
 
 begin
 
-    instr <= ROM(to_integer(unsigned(addr(7 downto 2))));
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if en = '1' then
+                instr <= ROM(to_integer(unsigned(addr(8 downto 2))));
+            end if;
+        end if;
+    end process;
 
 end Behavioral;

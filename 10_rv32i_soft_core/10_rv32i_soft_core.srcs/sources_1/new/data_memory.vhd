@@ -27,6 +27,10 @@ begin
     word_addr <= to_integer(unsigned(addr(7 downto 2)));
 
     process(clk)
+        variable byte0 : std_logic_vector(7 downto 0);
+        variable byte1 : std_logic_vector(7 downto 0);
+        variable byte2 : std_logic_vector(7 downto 0);
+        variable byte3 : std_logic_vector(7 downto 0);
     begin
         if rising_edge(clk) then
             if mem_write = '1' then
@@ -52,50 +56,41 @@ begin
                 end case;
 
             end if;
-        end if;
-    end process;
 
-    process(mem_read, funct3, word_addr, RAM)
-        variable byte0 : std_logic_vector(7 downto 0);
-        variable byte1 : std_logic_vector(7 downto 0);
-        variable byte2 : std_logic_vector(7 downto 0);
-        variable byte3 : std_logic_vector(7 downto 0);
-    begin
-        rd_data <= (others => '0');
+            if mem_read = '1' then
 
-        if mem_read = '1' then
+                byte0 := RAM(word_addr);
+                byte1 := RAM(word_addr + 1);
+                byte2 := RAM(word_addr + 2);
+                byte3 := RAM(word_addr + 3);
 
-            byte0 := RAM(word_addr);
-            byte1 := RAM(word_addr + 1);
-            byte2 := RAM(word_addr + 2);
-            byte3 := RAM(word_addr + 3);
+                case funct3 is
 
-            case funct3 is
+                    -- LB : sign extend the byte
+                    when "000" =>
+                        rd_data <= (31 downto 8 => byte0(7)) & byte0;
 
-                -- LB : sign extend the byte
-                when "000" =>
-                    rd_data <= (31 downto 8 => byte0(7)) & byte0;
+                    -- LH : sign extend the half-word
+                    when "001" =>
+                        rd_data <= (31 downto 16 => byte1(7)) & byte1 & byte0;
 
-                -- LH : sign extend the half-word
-                when "001" =>
-                    rd_data <= (31 downto 16 => byte1(7)) & byte1 & byte0;
+                    -- LW : full 32-bit word
+                    when "010" =>
+                        rd_data <= byte3 & byte2 & byte1 & byte0;
 
-                -- LW : full 32-bit word
-                when "010" =>
-                    rd_data <= byte3 & byte2 & byte1 & byte0;
+                    -- LBU
+                    when "100" =>
+                        rd_data <= (31 downto 8 => '0') & byte0;
 
-                -- LBU
-                when "100" =>
-                    rd_data <= (31 downto 8 => '0') & byte0;
+                    -- LHU
+                    when "101" =>
+                        rd_data <= (31 downto 16 => '0') & byte1 & byte0;
 
-                -- LHU
-                when "101" =>
-                    rd_data <= (31 downto 16 => '0') & byte1 & byte0;
+                    when others =>
+                        rd_data <= (others => '0');
 
-                when others =>
-                    rd_data <= (others => '0');
-
-            end case;
+                end case;
+            end if;
         end if;
     end process;
 
