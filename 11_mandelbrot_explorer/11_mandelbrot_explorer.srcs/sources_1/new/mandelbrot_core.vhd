@@ -21,7 +21,7 @@ end mandelbrot_core;
 
 architecture Behavioral of mandelbrot_core is
 
-    constant FOUR : signed(28 downto 0) := to_signed(4 * SCALE, 29);
+    constant FOUR : signed(28 downto 0) := to_signed(integer(4.0 * SCALE_REAL), 29);
 
     type state_type is (IDLE, WAIT_MUL, CALC, FINISH);
     signal state : state_type := IDLE;

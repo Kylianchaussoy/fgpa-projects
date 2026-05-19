@@ -4,8 +4,14 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity mandelbrot_top is
     Port (
-        clk : in  std_logic;
-        reset : in  std_logic;
+        clk : in std_logic;
+        reset : in std_logic;
+        btnL : in std_logic;
+        btnR : in std_logic;
+        btnD : in std_logic;
+        btnU : in std_logic;
+        btnC : in std_logic;
+        sw : in std_logic;
         vga_hs : out std_logic;
         vga_vs : out std_logic;
         vga_r : out std_logic_vector(3 downto 0);
@@ -63,6 +69,13 @@ architecture Behavioral of mandelbrot_top is
     signal prev_y : unsigned(9 downto 0) := (others => '1');
 
     signal pixel_color: std_logic_vector(11 downto 0);
+
+    signal zoom : std_logic := '0';
+    signal pan_left : std_logic := '0';
+    signal pan_right : std_logic := '0';
+    signal pan_up : std_logic := '0';
+    signal pan_down : std_logic := '0';
+
 begin
     
     clk_wiz_0_inst : clk_wiz_0
@@ -96,6 +109,13 @@ begin
 
     coordinate_mapper_inst : entity work.coordinate_mapper
         port map (
+            clk_25 => pixel_clk,
+            pan_right => pan_right,
+            pan_left => pan_left,
+            pan_down => pan_down,
+            pan_up => pan_up,
+            zoom => zoom,
+            zoom_mode => sw,
             pixel_x => compute_x,
             pixel_y => compute_y,
             scaled_x => c_re,
@@ -104,7 +124,7 @@ begin
                     
     frame_buffer_inst : entity work.frame_buffer
         port map(
-            clk_write  => clk,
+            clk_write => clk,
             we => bram_we,
             addr_write => write_addr,
             data_in => mb_iter(3 downto 0),
@@ -118,6 +138,42 @@ begin
             iter_count => bram_data_out, 
             done => '1',
             rgb => pixel_color
+        );
+
+    debounce_btnC: entity work.debounce_button 
+        port map (
+            clk => pixel_clk,
+            rst => reset,
+            button_in => btnC,
+            button_out => zoom
+        );
+    debounce_btnU: entity work.debounce_button 
+        port map (
+            clk => pixel_clk,
+            rst => reset,
+            button_in => btnU,
+            button_out => pan_up
+        );
+    debounce_btnD : entity work.debounce_button 
+        port map (
+            clk => pixel_clk,
+            rst => reset,
+            button_in => btnD,
+            button_out => pan_down
+        );
+    debounce_btnL : entity work.debounce_button 
+        port map (
+            clk => pixel_clk,
+            rst => reset,
+            button_in => btnL,
+            button_out => pan_left
+        );
+    debounce_btnR : entity work.debounce_button 
+        port map (
+            clk => pixel_clk,
+            rst => reset,
+            button_in => btnR,
+            button_out => pan_right
         );
 
     vga_r <= pixel_color(11 downto 8) when (video_on = '1') else "0000";

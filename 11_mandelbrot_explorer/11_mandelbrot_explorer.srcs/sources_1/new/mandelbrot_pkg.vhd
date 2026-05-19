@@ -1,5 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 package mandelbrot_pkg is
 
@@ -22,11 +23,13 @@ package mandelbrot_pkg is
     constant GREY : color_4b_t := x"888";
     constant BLACK : color_4b_t := x"000";
 
-    -- for Q4.24 notation
-    constant FRAC_BITS : integer := 24;
-    constant SCALE : integer := 2**FRAC_BITS;
-
-    constant H_PIXELS : real := 640.0;
-    constant V_PIXELS : real := 480.0;
+    -- Q4.24 notation
+    constant SCALE_REAL : real := 16777216.0;
+    constant INIT_TARGET_X : signed(27 downto 0) := to_signed(integer(0.0 * SCALE_REAL), 28);
+    constant INIT_TARGET_Y : signed(27 downto 0) := to_signed(integer(0.0 * SCALE_REAL), 28);
+    constant INIT_ZOOM : signed(27 downto 0) := to_signed(integer(3.5 * SCALE_REAL), 28);
+    constant INV_H_PIXELS : signed(27 downto 0) := to_signed(integer((1.0 / 640.0) * SCALE_REAL), 28);
+    constant MIN_ZOOM_WIDTH : signed := to_signed(4096, 28);
+    constant MAX_ZOOM_WIDTH : signed := to_signed(67108864, 28);
 
 end package mandelbrot_pkg;
