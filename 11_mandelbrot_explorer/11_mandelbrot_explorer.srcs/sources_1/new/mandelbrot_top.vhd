@@ -198,16 +198,12 @@ begin
             else
                 read_addr <= (others => '0');
             end if;
-            -- read_addr <= to_unsigned(to_integer(pixel_y) * 640 + to_integer(pixel_x), 19) 
-            --     when (pixel_x < 640 and pixel_y < 480) else (others => '0');
 
             if (compute_x < 640 and compute_y < 480) then
                 write_addr <= to_unsigned(to_integer(compute_y) * 640 + to_integer(compute_x), 19);
             else
                 write_addr <= (others => '0');
             end if;
-            -- write_addr <= to_unsigned(to_integer(compute_y) * 640 + to_integer(compute_x), 19) 
-            --       when (compute_x < 640 and compute_y < 480) else (others => '0');
 
             case state is
 

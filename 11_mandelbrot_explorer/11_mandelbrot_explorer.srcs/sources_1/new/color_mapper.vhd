@@ -34,8 +34,8 @@ begin
                 when x"C" => rgb <= MAGENTA;
                 when x"D" => rgb <= PINK;
                 when x"E" => rgb <= WHITE;
-                when x"F" => rgb <= GREY;
-                when others => rgb <= BLACK;
+                when x"F" => rgb <= BLACK;
+                when others => rgb <= GREY;
             end case;
         end if;
     end process;
